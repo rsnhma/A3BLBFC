@@ -25,6 +25,12 @@ public class DialogueManager : MonoBehaviour
 
     private bool isDialogueActive = false;
 
+    // Public method to check if dialogue is active
+    public bool IsDialogueActive()
+    {
+        return isDialogueActive;
+    }
+
     void Awake()
     {
         // Singleton pattern
@@ -53,14 +59,23 @@ public class DialogueManager : MonoBehaviour
 
     void Update()
     {
-        // Allow pressing E or Escape to close dialogue
-        if (isDialogueActive && (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Escape)))
+        // Use Space to close dialogue (cleaner than using E)
+        if (isDialogueActive)
         {
-            CloseDialogue();
+            if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Escape))
+            {
+                CloseDialogue();
+            }
         }
     }
 
     public void ShowDialogue(string message, InteractableObject.InteractionType type)
+    {
+        ShowDialogue(message, type, "");
+    }
+
+    // Overload method that accepts custom speaker name
+    public void ShowDialogue(string message, InteractableObject.InteractionType type, string speakerName)
     {
         if (dialoguePanel == null) return;
 
@@ -73,20 +88,32 @@ public class DialogueManager : MonoBehaviour
             dialogueText.text = message;
         }
 
-        // Set NPC name based on type (optional)
+        // Set speaker name
         if (npcNameText != null)
         {
-            switch (type)
+            if (!string.IsNullOrEmpty(speakerName))
             {
-                case InteractableObject.InteractionType.NPC:
-                    npcNameText.text = "NPC";
-                    break;
-                case InteractableObject.InteractionType.Object:
-                    npcNameText.text = "Clue";
-                    break;
-                default:
-                    npcNameText.text = "";
-                    break;
+                // Use custom name if provided
+                npcNameText.text = speakerName;
+            }
+            else
+            {
+                // Use default based on type
+                switch (type)
+                {
+                    case InteractableObject.InteractionType.NPC:
+                        npcNameText.text = ""; // Will be overridden by custom name
+                        break;
+                    case InteractableObject.InteractionType.Object:
+                        npcNameText.text = "Clue";
+                        break;
+                    case InteractableObject.InteractionType.Door:
+                        npcNameText.text = ""; // Blank for intro/door messages
+                        break;
+                    default:
+                        npcNameText.text = "";
+                        break;
+                }
             }
         }
 

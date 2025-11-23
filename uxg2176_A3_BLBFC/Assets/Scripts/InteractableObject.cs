@@ -7,6 +7,9 @@ public class InteractableObject : MonoBehaviour
     [Tooltip("Type of interactable: NPC or Object")]
     public InteractionType interactionType;
 
+    [Tooltip("Name to display (e.g., 'Mike' for NPC, leave blank for 'Clue')")]
+    public string speakerName = "";
+
     [Tooltip("Dialogue/message to show when interacting")]
     [TextArea(3, 10)]
     public string interactionMessage;
@@ -15,7 +18,7 @@ public class InteractableObject : MonoBehaviour
     public bool countsTowardCompletion = true;
 
     [Tooltip("Can only interact once?")]
-    public bool oneTimeInteraction = true;
+    public bool oneTimeInteraction = false;
 
     [Header("Visual Feedback")]
     [Tooltip("UI prompt to show when player is near (e.g., 'Press E to interact')")]
@@ -27,6 +30,12 @@ public class InteractableObject : MonoBehaviour
     // Internal state
     private bool playerInRange = false;
     private bool hasInteracted = false;
+
+    // Public method to check if this object was interacted with
+    public bool HasInteracted()
+    {
+        return hasInteracted;
+    }
 
     public enum InteractionType
     {
@@ -47,44 +56,35 @@ public class InteractableObject : MonoBehaviour
 
     void Update()
     {
+        // Don't allow interaction while dialogue is open
+        if (DialogueManager.Instance != null && DialogueManager.Instance.IsDialogueActive())
+        {
+            return;
+        }
+
         // Check for E key press when player is in range
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
-            // Check if already interacted and it's one-time only
-            if (oneTimeInteraction && hasInteracted)
-                return;
-
             Interact();
         }
     }
 
     void Interact()
     {
-        hasInteracted = true;
-
-        // Show dialogue/message
+        // Show dialogue/message with custom speaker name
         if (DialogueManager.Instance != null)
         {
-            DialogueManager.Instance.ShowDialogue(interactionMessage, interactionType);
+            DialogueManager.Instance.ShowDialogue(interactionMessage, interactionType, speakerName);
         }
 
-        // Register interaction with GameManager
-        if (countsTowardCompletion && GameManager.Instance != null)
+        // Register interaction with GameManager (only count once)
+        // FIXED: Check hasInteracted BEFORE setting it to true!
+        if (countsTowardCompletion && GameManager.Instance != null && !hasInteracted)
         {
             GameManager.Instance.RegisterInteraction();
         }
 
-        // Hide prompt after interaction (if one-time)
-        if (oneTimeInteraction && interactionPrompt != null)
-        {
-            interactionPrompt.SetActive(false);
-        }
-
-        // Optional: Disable highlight after interaction
-        if (oneTimeInteraction && highlightEffect != null)
-        {
-            highlightEffect.SetActive(false);
-        }
+        hasInteracted = true; // Set AFTER counting
 
         Debug.Log($"Interacted with {gameObject.name}: {interactionMessage}");
     }
@@ -97,13 +97,13 @@ public class InteractableObject : MonoBehaviour
             playerInRange = true;
 
             // Show interaction prompt
-            if (interactionPrompt != null && (!oneTimeInteraction || !hasInteracted))
+            if (interactionPrompt != null)
             {
                 interactionPrompt.SetActive(true);
             }
 
             // Show highlight
-            if (highlightEffect != null && (!oneTimeInteraction || !hasInteracted))
+            if (highlightEffect != null)
             {
                 highlightEffect.SetActive(true);
             }
