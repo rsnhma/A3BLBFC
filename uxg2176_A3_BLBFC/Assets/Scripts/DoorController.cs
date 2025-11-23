@@ -31,9 +31,12 @@ public class DoorController : MonoBehaviour
     {
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
+            Debug.Log("E pressed at door! Locked: " + isLocked); // ADD THIS
+
             if (!isLocked)
             {
-                // Player can exit - trigger level complete
+                Debug.Log("Door unlocked - calling LevelComplete"); // ADD THIS
+
                 if (GameManager.Instance != null)
                 {
                     GameManager.Instance.LevelComplete();
@@ -41,22 +44,16 @@ public class DoorController : MonoBehaviour
             }
             else
             {
-                // Show locked message
+                Debug.Log("Door locked - showing message"); // ADD THIS
+
                 if (DialogueManager.Instance != null)
                 {
-                    DialogueManager.Instance.ShowDialogue(lockedMessage, InteractableObject.InteractionType.Door);
+                    DialogueManager.Instance.ShowDialogue(lockedMessage, InteractableObject.InteractionType.Door, "");
                 }
             }
         }
     }
-
-    // This gets called automatically when the door GameObject is activated
-    void OnEnable()
-    {
-        UnlockDoor();
-    }
-
-    // Call this from GameManager when all interactions are complete
+ 
     public void UnlockDoor()
     {
         isLocked = false;
@@ -82,14 +79,26 @@ public class DoorController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log("Door trigger entered by: " + other.name + " | Tag: " + other.tag); // ADD THIS
+
         if (other.CompareTag("Player") || other.name == "PlayerBody")
         {
+            Debug.Log("PLAYER DETECTED AT DOOR!"); // ADD THIS
             playerInRange = true;
 
             if (interactionPrompt != null)
             {
+                Debug.Log("Showing interaction prompt"); // ADD THIS
                 interactionPrompt.SetActive(true);
             }
+            else
+            {
+                Debug.LogError("Interaction prompt is NULL! Not assigned in Inspector!"); // ADD THIS
+            }
+        }
+        else
+        {
+            Debug.Log("Not the player - ignoring"); // ADD THIS
         }
     }
 

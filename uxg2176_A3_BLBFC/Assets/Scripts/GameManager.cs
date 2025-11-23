@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Exit / Level Complete")]
     [Tooltip("Exit object that should appear when interactions are done")]
-    public GameObject exitObject;             // Door, portal, etc.
+    public DoorController exitDoor;             // Door, portal, etc.
     public GameObject levelCompletePanel;     // UI panel for level complete
 
     [Header("Game Over")]
@@ -47,8 +47,7 @@ public class GameManager : MonoBehaviour
     {
         interactionsRemaining = totalInteractionsRequired;
 
-        if (exitObject != null)
-            exitObject.SetActive(false); // Hide exit until ready
+        
 
         UpdateHUD();
 
@@ -83,10 +82,16 @@ public class GameManager : MonoBehaviour
 
     void OnAllInteractionsComplete()
     {
-        // Show exit
-        if (exitObject != null)
-            exitObject.SetActive(true);
-        // You could also play a sound or show a message.
+        // Unlock the door
+        if (exitDoor != null)
+        {
+            exitDoor.UnlockDoor();
+            Debug.Log("Door unlocked via assigned reference!");
+        }
+        else
+        {
+            Debug.LogError("Exit door not assigned in GameManager!");
+        }
     }
 
     // Call this when player reaches exit / wins
