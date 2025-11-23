@@ -3,7 +3,6 @@ using UnityEngine;
 public class PauseMenu : MonoBehaviour
 {
     public GameObject pausePanel;  // Assign in Inspector
-
     private bool isPaused = false;
 
     void Start()
@@ -15,6 +14,12 @@ public class PauseMenu : MonoBehaviour
 
     void Update()
     {
+        // Don't allow pause if game is over
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver())
+        {
+            return; // Exit early - no pausing during game over
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (isPaused)
@@ -52,5 +57,13 @@ public class PauseMenu : MonoBehaviour
             GameManager.Instance.ReturnToStartMenu();
         }
     }
-}
 
+    // NEW: Quit game function for pause menu button
+    public void QuitGame()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.QuitGame();
+        }
+    }
+}

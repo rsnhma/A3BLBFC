@@ -132,4 +132,20 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
         SceneManager.LoadScene(startMenuSceneName);
     }
+    public bool IsGameOver()
+    {
+        return isGameOver;
+    }
+
+    // Add this method to quit the game
+    public void QuitGame()
+    {
+        Debug.Log("Quitting game...");
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
 }
